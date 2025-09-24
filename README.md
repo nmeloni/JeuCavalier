@@ -1,2 +1,2 @@
 # JeuCavalier
-Je de parcours de cavalier sur un échiquier encombré
+Jeu de parcours de cavalier sur un échiquier encombré
