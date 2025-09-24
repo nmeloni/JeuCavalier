@@ -1,17 +1,17 @@
-from engine import Engine
+from .engine import Engine
 import tkinter as tk
-from PIL import Image, ImageTk
-from pathlib import Path
+
+# couleur des cases
+COLORS = ['Cornsilk','Sienna']
 
 # États du jeu
 STATE_NONE = 0
 STATE_PLAYING = 1
 STATE_WON = 2
 
-# Taille des cases (à adapter selon vos besoins)
+# Taille des cases
 SIDE = 64
 
-# Puzzles d'exemple - vous devrez adapter ce format selon vos niveaux
 # Format: (largeur, hauteur, [(row, col, piece), ...])
 PUZZLES = [
     # Niveau 1: 6x6 simple
@@ -31,7 +31,6 @@ PUZZLES = [
     ]),
     # Ajoutez d'autres niveaux ici...
 ]
-
 class Board(tk.Canvas):
     """Classe pour afficher l'échiquier graphiquement."""
     
@@ -67,7 +66,7 @@ class Board(tk.Canvas):
                 x2, y2 = x1 + SIDE, y1 + SIDE
                 
                 # Couleur des cases (échiquier)
-                color = "white" if (row + col) % 2 == 0 else "lightgray"
+                color = COLORS[0] if (row + col) % 2 == 0 else COLORS[1]
                 
                 # Surligner les mouvements possibles
                 if self.selected_pos == self.engine.knight_pos:
@@ -310,51 +309,5 @@ class Menu(tk.Frame):
                     self.after(500, lambda: self.animate_solution(path, step + 1))
 
 
-class MainApp(tk.Frame):
-    def __init__(self, parent, *args, **kwargs):
-        tk.Frame.__init__(self, parent, *args, **kwargs)
-        self.root = parent
-        self.root.title("Jeu du cavalier")
-        
-        # Initialiser l'engine (il sera configuré lors du chargement du niveau)
-        self.engine = Engine(8, 8)  # Taille par défaut
-        
-        # Charger les images
-        self.assets_path = Path(__file__).parent.parent / "assets" / "img"
-        #print(self.assets_path.parent.parent / "assets" / "img")
-        self.img_name = ["cavalier.png", "pion.png", "pion_noir.png", "left.png", "right.png"]
-        self.init_images()
-        
-        # Créer l'interface
-        self.board = Board(self)
-        self.board.pack(side="right", padx=10, pady=10, fill="both", expand=True)
-        
-        self.menu = Menu(self)
-        self.menu.pack(side="left", padx=10, pady=10, fill="both", expand=True)
-        
-        # Charger le premier niveau
-        self.menu.load_level()
-    
-    def init_images(self):
-        """Charge les images du jeu."""
-        self.images = {}
-        for i in range(len(self.img_name)):
-            name = self.assets_path / self.img_name[i]
-            try:
-                image = Image.open(name)
-                image = image.resize((SIDE, SIDE), Image.LANCZOS)
-                img = ImageTk.PhotoImage(image)
-                self.images[i + 1] = img
-            except FileNotFoundError:
-                print(f"Image {name} non trouvée, utilisation du mode texte")
-                continue
-    
-    def mainloop(self):
-        """Lance la boucle principale de l'application."""
-        self.root.mainloop()
-
-
-if __name__ == '__main__':
-    App = MainApp(tk.Tk())
-    App.pack(side="top", fill="both", expand=True)
-    App.mainloop()
+if __name__ == "__main__":
+    pass
