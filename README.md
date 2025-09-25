@@ -1,4 +1,4 @@
-# JeuCavalier
+# Jeu du cavalier
 
 Jeu de parcours de cavalier sur un échiquier encombré. Programme
 pédagogique du cours d'algorithmique de 1ère année de licence
