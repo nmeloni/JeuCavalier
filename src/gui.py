@@ -1,5 +1,7 @@
 from .engine import Engine
+from pathlib import Path
 import tkinter as tk
+import json
 
 # couleur des cases
 COLORS = ['Cornsilk','Sienna']
@@ -10,27 +12,23 @@ STATE_PLAYING = 1
 STATE_WON = 2
 
 # Taille des cases
-SIDE = 64
+SIDE = 40
 
 # Format: (largeur, hauteur, [(row, col, piece), ...])
-PUZZLES = [
-    # Niveau 1: 6x6 simple
-    (6, 6, [
-        (0, 0, 'K'),  # Cavalier
-        (2, 2, 'P'),  # Obstacle
-        (5, 5, 'p')   # Cible
-    ]),
-    # Niveau 2: 8x8 avec plus d'obstacles
-    (8, 8, [
-        (0, 0, 'K'),   # Cavalier
-        (2, 2, 'P'),   # Obstacles
-        (3, 3, 'P'),
-        (4, 4, 'P'),
-        (7, 7, 'p'),   # Cible
-        (6, 5, 'p')    # Deuxième cible
-    ]),
-    # Ajoutez d'autres niveaux ici...
+DEFAULT_PUZZLE = [
+    {
+	"width": 4,
+	"height":4,
+	"pieces":[
+	    [0, 2, "K"],
+	    [1, 0, "P"],
+	    [2, 3, "P"],
+	    [3, 2, "P"],
+	    [3, 0, "p"]
+	]
+    }
 ]
+
 class Board(tk.Canvas):
     """Classe pour afficher l'échiquier graphiquement."""
     
@@ -157,7 +155,7 @@ class Board(tk.Canvas):
 
 
 class Menu(tk.Frame):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, puzzlesdb, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.app = parent
         self.level_nb = 0
@@ -172,6 +170,9 @@ class Menu(tk.Frame):
         
         # Interface
         self.setup_ui()
+
+        # liste des puzzles
+        self.puzzles = self.load_puzzles(puzzlesdb)
         
     def setup_ui(self):
         """Initialise l'interface utilisateur du menu."""
@@ -225,10 +226,25 @@ class Menu(tk.Frame):
                                  command=self.auto_solve)
         self.btn_solve.pack(pady=5)
         
+    def load_puzzles(self,filename):
+        """Charge les puzzles depuis le fichier JSON."""
+        try:
+            if Path(filename).exists():
+                with open(filename, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    return data.get('puzzles', [])
+            else:
+                # Créer un fichier par défaut s'il n'existe pas
+                return DEFAULT_PUZZLE
+        except (json.JSONDecodeError, FileNotFoundError, PermissionError) as e:
+            print(f"Erreur lors du chargement des puzzles: {e}")
+            return DEFAULT_PUZZLE
+        
     def load_level(self):
         """Charge le niveau actuel."""
-        if 0 <= self.level_nb < len(PUZZLES):
-            width, height, pieces = PUZZLES[self.level_nb]
+        if 0 <= self.level_nb < len(self.puzzles):
+            puzzle = self.puzzles[self.level_nb]
+            width, height, pieces = puzzle["width"], puzzle["height"], puzzle["pieces"]
             
             # Réinitialiser l'engine avec la nouvelle taille
             self.engine.width = width
@@ -251,11 +267,11 @@ class Menu(tk.Frame):
         
         # Mettre à jour l'état des boutons
         self.bouton_prev.config(state="normal" if self.level_nb > 0 else "disabled")
-        self.bouton_next.config(state="normal" if self.level_nb < len(PUZZLES)-1 else "disabled")
+        self.bouton_next.config(state="normal" if self.level_nb < len(self.puzzles)-1 else "disabled")
     
     def next_level(self):
         """Passe au niveau suivant."""
-        if self.level_nb < len(PUZZLES) - 1:
+        if self.level_nb < len(self.puzzles) - 1:
             self.level_nb += 1
             self.load_level()
     

@@ -2,7 +2,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 from pathlib import Path
 
-from src.gui import Board, Menu
+from src.gui import Board, Menu, SIDE
 from src.engine import Engine
 
 
@@ -17,7 +17,9 @@ class MainApp(tk.Frame):
         self.engine = Engine(8, 8)  # Taille par défaut
         
         # Charger les images depuis le répertoire assets/img
-        self.assets_path = Path(__file__).parent / "assets" / "img"
+        self.assets_path = Path(__file__).parent / "assets"
+        self.img_path = self.assets_path / "img"
+        self.puzzles_path = self.assets_path / "puzzles" / "puzzles.json"
         #print(self.assets_path.parent.parent / "assets" / "img")
         self.img_name = ["cavalier.png", "pion.png", "pion_noir.png", "left.png", "right.png"]
         self.init_images()
@@ -26,7 +28,7 @@ class MainApp(tk.Frame):
         self.board = Board(self)
         self.board.pack(side="right", padx=10, pady=10, fill="both", expand=True)
         
-        self.menu = Menu(self)
+        self.menu = Menu(self, self.puzzles_path )
         self.menu.pack(side="left", padx=10, pady=10, fill="both", expand=True)
         
         # Charger le premier niveau
@@ -36,7 +38,7 @@ class MainApp(tk.Frame):
         """Charge les images du jeu."""
         self.images = {}
         for i in range(len(self.img_name)):
-            name = self.assets_path / self.img_name[i]
+            name = self.img_path / self.img_name[i]
             try:
                 image = Image.open(name)
                 image = image.resize((SIDE, SIDE), Image.LANCZOS)
